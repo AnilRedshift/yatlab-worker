@@ -26,27 +26,33 @@ defmodule Worker.Database do
   @database_api Application.get_env(:worker, :database_api)
 
   def call(team_id) do
-    acronyms = parse_acronyms(@database_api.get_acronyms(team_id))
-    {name, credentials} = parse_team(@database_api.get_team(team_id))
-    result = %Result{
-      acronyms: acronyms,
-      name: name,
-      credentials: credentials,
-    }
-    {:ok, result}
+    with \
+      {:ok, acronym_data} <- @database_api.get_acronyms(team_id),
+      {:ok, team_data} <- @database_api.get_team(team_id),
+      {:ok, acronyms} <- parse_acronyms(acronym_data),
+      {:ok, name, credentials} <- parse_team(team_data)
+    do
+      result = %Result{
+        acronyms: acronyms,
+        name: name,
+        credentials: credentials,
+      }
+      {:ok, result}
+    else
+      {:error, error} -> {:error, error}
+      _ -> {:error, %{code: "unknown"}}
+    end
   end
 
-  defp parse_acronyms({:ok, %Postgrex.Result{} = result}) do
-    Enum.map(parse_result(result), &struct(Acronym, &1))
+  defp parse_acronyms(result) do
+    {:ok, Enum.map(parse_result(result), &struct(Acronym, &1))}
   end
 
-  defp parse_acronyms(error) do
-    error
-  end
-
-  defp parse_team({:ok, %Postgrex.Result{} = result}) do
-    [team] = parse_result(result)
-    {team.name, struct(Credentials, team)}
+  defp parse_team(result) do
+    case parse_result(result) do
+      [team]-> {:ok, team.name, struct(Credentials, team)}
+      _ -> {:error, %{code: "invalid_team"}}
+    end
   end
 
   defp parse_result(%Postgrex.Result{columns: columns, rows: rows}) do
