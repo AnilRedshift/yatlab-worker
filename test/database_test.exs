@@ -76,6 +76,7 @@ defmodule DatabaseTest do
     stub_get_team
 
     expected = %Result{
+      name: "My Cool Team",
       acronyms: expected_acronyms,
       credentials: expected_credentials,
     }
