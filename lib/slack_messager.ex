@@ -6,8 +6,13 @@ defmodule SlackMessager do
     {:ok, state}
   end
 
-  def handle_event(message = %{type: "message"}, slack, state) do
-    send_message("I got a message!", message.channel, slack)
+  def handle_event(%{type: "message"} = message, slack, state) do
+    case message.text do
+      "Matt" ->
+        token = state.credentials.bot_access_token
+        Slack.Web.Reactions.add("question", %{token: token, channel: message.channel, timestamp: message.ts})
+      _ -> {:ok}
+    end
     {:ok, state}
   end
   def handle_event(_, _, state), do: {:ok, state}
@@ -21,3 +26,5 @@ defmodule SlackMessager do
   end
   def handle_info(_, _, state), do: {:ok, state}
 end
+
+#slack.me.id
