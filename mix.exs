@@ -22,6 +22,7 @@ defmodule Worker.MixProject do
   defp deps do
     [
       {:postgrex, "~> 0.13.5"},
+      {:mox, "~> 0.3", only: :test},
     ]
   end
 end
