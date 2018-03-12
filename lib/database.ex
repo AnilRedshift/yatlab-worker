@@ -3,8 +3,7 @@ defmodule Worker.Database do
     defstruct \
     access_token: "",
     bot_access_token: "",
-    bot_user_id: "",
-    bot_access_token: ""
+    bot_user_id: ""
   end
 
   defmodule Result do
@@ -28,6 +27,7 @@ defmodule Worker.Database do
 
   def call(team_id) do
     acronyms = parse_acronyms(@database_api.get_acronyms(team_id))
+    team = @database_api.get_team(team_id)
     result = %Result{
       acronyms: acronyms
     }
