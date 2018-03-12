@@ -8,21 +8,22 @@ defmodule DatabaseTest do
 
   @team_id "team1"
 
-  defp stub_get_acronyms do
+  defp stub_get_acronyms(rows \\ nil) do
+    rows = rows || [
+      [2, "TLA", "three letter acronym", "the dumbest acronym", @team_id,
+      "Anil Kulkarni"],
+      [6, "HAM", "Jordan", "he's a ham", @team_id, "Anil Kulkarni"],
+    ]
     Worker.DatabaseApi.MockClient
     |> expect(:get_acronyms, fn @team_id ->
       {:ok, %Postgrex.Result{
         columns: ["id", "name", "means", "description", "team_id", "added_by"],
-        rows: [
-          [2, "TLA", "three letter acronym", "the dumbest acronym", @team_id,
-          "Anil Kulkarni"],
-          [6, "HAM", "Jordan", "he's a ham", @team_id, "Anil Kulkarni"],
-        ]
+        rows: rows
       }}
     end)
   end
 
-  defp expected_acronyms do
+  defp expected_acronyms() do
     [
       %Worker.Database.Acronym{
         added_by: "Anil Kulkarni",
@@ -43,22 +44,20 @@ defmodule DatabaseTest do
     ]
   end
 
-  defp stub_get_team do
+  defp stub_get_team(rows \\ nil) do
+    rows = rows || [
+      [@team_id,
+      "xoxp-access-token",
+      "UBOTUSERID",
+      "xoxb-bot-token",
+      "My Cool Team"]
+    ]
     Worker.DatabaseApi.MockClient
     |> expect(:get_team, fn @team_id ->
       {:ok,
       %Postgrex.Result{
         columns: ["id", "access_token", "bot_user_id", "bot_access_token", "name"],
-        command: :select,
-        connection_id: 61431,
-        num_rows: 1,
-        rows: [
-          [@team_id,
-          "xoxp-access-token",
-          "UBOTUSERID",
-          "xoxb-bot-token",
-          "My Cool Team"]
-        ]
+        rows: rows
       }}
     end)
   end
@@ -82,5 +81,11 @@ defmodule DatabaseTest do
     }
 
     assert Worker.Database.call(@team_id) == {:ok, expected}
+  end
+
+  test "returns an error when the team_id is invalid" do
+    stub_get_acronyms
+    stub_get_team([])
+    assert Worker.Database.call(@team_id) == {:error, %{code: "invalid_team"}}
   end
 end
