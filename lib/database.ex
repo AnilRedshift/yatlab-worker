@@ -39,6 +39,8 @@ defmodule Worker.Database do
       }
       {:ok, result}
     else
+      {:error, %Postgrex.Error{} = error} ->
+        {:error, %{code: "db_error", message: error.message}}
       {:error, error} -> {:error, error}
       _ -> {:error, %{code: "unknown"}}
     end

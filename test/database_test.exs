@@ -1,4 +1,5 @@
 defmodule DatabaseTest do
+  require Postgrex
   import Mox
   use ExUnit.Case
   alias Worker.Database.{Acronym, Result, Credentials}
@@ -83,9 +84,18 @@ defmodule DatabaseTest do
     assert Worker.Database.call(@team_id) == {:ok, expected}
   end
 
-  test "returns an error when the team_id is invalid" do
+  test "returns invalid_team when the team_id is invalid" do
     stub_get_acronyms
     stub_get_team([])
     assert Worker.Database.call(@team_id) == {:error, %{code: "invalid_team"}}
+  end
+
+  test "returns db_error when postgres throws an error" do
+    stub_get_acronyms
+    Worker.DatabaseApi.MockClient
+    |> expect(:get_team, fn @team_id ->
+      {:error, %Postgrex.Error{message: "unexpected postgres status: idle"}}
+    end)
+    assert Worker.Database.call(@team_id) == {:error, %{code: "db_error", message: "unexpected postgres status: idle"}}
   end
 end
