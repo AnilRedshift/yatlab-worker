@@ -1,18 +1,6 @@
 defmodule Worker do
-  @moduledoc """
-  Documentation for Worker.
-  """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Worker.hello
-      :world
-
-  """
   def hello do
-    :world
+    {:ok, results} = Worker.Database.call("T028NREAQ")
+    Slack.Bot.start_link(SlackMessager, [], results.credentials.bot_access_token)
   end
 end
