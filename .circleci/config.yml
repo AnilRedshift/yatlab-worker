@@ -39,7 +39,8 @@ jobs:
       - save_cache:
           key: dependency-cache-{{ checksum "mix.lock" }}
           paths:
-            - node_modules
+            - deps
+            - _build
 
   deploy:
     <<: *defaults
