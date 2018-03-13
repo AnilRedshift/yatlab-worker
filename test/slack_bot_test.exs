@@ -27,6 +27,11 @@ defmodule SlackBotTest do
     assert {:ok, state} = Worker.SlackBot.handle_event(message, slack, state)
   end
 
+  test "handle_event does not add the reaction when there are no acronyms in the text" do
+    m = message(%{text: "There are no acronyms here"})
+    assert {:ok, state} = Worker.SlackBot.handle_event(message, slack, state)
+  end
+
   defp message(%{} = options \\ %{}) do
     defaults = %{
       type: "message",
