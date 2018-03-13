@@ -1,10 +1,11 @@
 defmodule SlackBotTest do
   import Mox
-  alias Worker.Database.Credentials
+  alias Worker.Database.{Credentials, Acronym}
   use ExUnit.Case
 
   @bot_id "bot_user_123"
   @user_id "real_user_345"
+  @team_id "team_id_999"
 
   setup :verify_on_exit!
 
@@ -50,6 +51,24 @@ defmodule SlackBotTest do
   defp state do
     %{
       credentials: %Credentials{},
+      acronyms: [
+        %Acronym{
+          id: 0,
+          name: "EOD",
+          means: "End of day",
+          description: "",
+          team_id: @team_id,
+          added_by: "Ada",
+        },
+        %Acronym{
+          id: 0,
+          name: "THROW",
+          means: "Train human really obey wishes",
+          description: "Dogs want you to throw the ball",
+          team_id: @team_id,
+          added_by: "Ada",
+        },
+      ],
     }
   end
 end

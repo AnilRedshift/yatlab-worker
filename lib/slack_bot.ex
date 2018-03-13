@@ -14,8 +14,8 @@ defmodule Worker.SlackBot do
   def handle_event(%{user: %{id: user_id}}, %{me: %{id: bot_id}}, state) when user_id == bot_id, do: {:ok, state}
   def handle_event(%{type: "message", subtype: "bot_message"},_, state), do: {:ok, state}
   def handle_event(%{type: "message"} = message, _, state) do
-    case message.text do
-      "You clicked the button" ->
+    case Worker.MessageParser.parse(message.text, state.acronyms) do
+      [_|_] ->
         @slack_web_reactions_api.add(@emoji, %{token: token(state), channel: message.channel, timestamp: message.ts})
       _ -> {:ok}
     end
