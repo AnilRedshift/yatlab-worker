@@ -1,6 +1,9 @@
 defmodule Worker.SlackBot do
   use Slack
 
+  @slack_web_chat_api Application.get_env(:worker, :slack_web_chat_api)
+  @slack_web_im_api Application.get_env(:worker, :slack_web_im_api)
+  @slack_web_reactions_api Application.get_env(:worker, :slack_web_reactions_api)
   @emoji "question"
 
   def handle_connect(slack, state) do
@@ -13,7 +16,7 @@ defmodule Worker.SlackBot do
   def handle_event(%{type: "message"} = message, _, state) do
     case message.text do
       "You clicked the button" ->
-        Slack.Web.Reactions.add(@emoji, %{token: token(state), channel: message.channel, timestamp: message.ts})
+        @slack_web_reactions_api.add(@emoji, %{token: token(state), channel: message.channel, timestamp: message.ts})
       _ -> {:ok}
     end
     {:ok, state}
@@ -23,8 +26,8 @@ defmodule Worker.SlackBot do
   # All DM's start with D, ignore reactions added to direct messages
   def handle_event(%{type: "reaction_added", item: %{channel: "D" <> _}}, _, state), do: {:ok, state}
   def handle_event(%{type: "reaction_added", item: %{type: "message"}} = message, _, state) do
-    %{"channel" => %{"id" => channel_id}} = Slack.Web.Im.open(message.user, %{token: token(state)})
-    Slack.Web.Chat.post_message(channel_id, "You clicked the button", %{token: token(state), as_user: false})
+    %{"channel" => %{"id" => channel_id}} = @slack_web_im_api.open(message.user, %{token: token(state)})
+    @slack_web_chat_api.post_message(channel_id, "You clicked the button", %{token: token(state), as_user: false})
     {:ok, state}
   end
 
