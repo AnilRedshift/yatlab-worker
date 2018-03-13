@@ -6,6 +6,11 @@ defmodule SlackBotTest do
   @bot_id "bot_user_123"
   @user_id "real_user_345"
   @team_id "team_id_999"
+  @dm_channel "D789"
+  @channel "C123"
+  @group "G456"
+  @reaction "question"
+  @ts "thread_id_222"
 
   setup :verify_on_exit!
 
@@ -21,7 +26,7 @@ defmodule SlackBotTest do
 
   test "handle_event adds a checkbox if one acronym is in the text" do
     Worker.SlackWebApi.Reactions.MockClient
-    |> expect(:add, fn "question", %{} ->
+    |> expect(:add, fn @reaction, %{} ->
       {:ok}
     end)
     assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
@@ -32,12 +37,53 @@ defmodule SlackBotTest do
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
+  test "handle_event sends a DM when the question emoji is clicked in a channel" do
+    Worker.SlackWebApi.Channels.MockClient
+    |> expect(:replies, fn (@channel, @ts, _) ->
+      %{
+        "messages" => [
+          %{
+            "text" => "I need this by EOD."
+          },
+        ],
+      }
+    end)
+
+    Worker.SlackWebApi.Im.MockClient
+    |> expect(:open, fn @user_id, _ ->
+      %{
+        "channel" => %{
+          "id" => @dm_channel,
+        },
+      }
+    end)
+
+    Worker.SlackWebApi.Chat.MockClient
+    |> expect(:post_message, fn(@dm_channel, _, _) -> {:ok} end)
+
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(reaction_message(), slack(), state())
+  end
+
+  defp reaction_message(%{} = options \\ %{}) do
+    defaults = %{
+      type: "reaction_added",
+      reaction: @reaction,
+      item: %{
+        type: "message",
+        ts: @ts,
+        channel: @channel,
+      },
+      user: @user_id,
+    }
+    Map.merge(defaults, options)
+  end
+
   defp message(%{} = options \\ %{}) do
     defaults = %{
       type: "message",
       text: "I need this by EOD.",
       channel: "my_channel",
-      ts: "my_timestamp",
+      ts: @ts,
       user: %{
         id: @user_id
       },

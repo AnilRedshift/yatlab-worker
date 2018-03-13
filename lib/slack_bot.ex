@@ -40,11 +40,11 @@ defmodule Worker.SlackBot do
   defp web_token(state), do: state.credentials.access_token
 
   defp get_text(%{item: %{ts: ts, channel: "G" <> _ = group}}, state) do
-    get_text(Slack.Web.Groups.replies(group, ts, %{token: web_token(state)}))
+    get_text(@slack_web_groups_api.replies(group, ts, %{token: web_token(state)}))
   end
 
   defp get_text(%{item: %{ts: ts, channel: channel}}, state) do
-    get_text(Slack.Web.Channels.replies(channel, ts, %{token: web_token(state)}))
+    get_text(@slack_web_channels_api.replies(channel, ts, %{token: web_token(state)}))
   end
 
   defp get_text(%{"messages" => []}), do: ""
