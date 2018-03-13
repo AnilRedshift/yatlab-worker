@@ -6,18 +6,30 @@ defmodule SlackBotTest do
   @bot_id "bot_user_123"
   @user_id "real_user_345"
 
+  setup :verify_on_exit!
+
   test "handle_event ignores messages sent from the bot" do
     m = message(%{user: %{ id: @bot_id }})
     assert {:ok, state} = Worker.SlackBot.handle_event(m, slack, state)
   end
 
-  test "Ignore messages sent from another bot" do
+  test "handle_event ignores messages sent from another bot" do
+    m = message(%{subtype: "bot_message"})
+    assert {:ok, state} = Worker.SlackBot.handle_event(m, slack, state)
+  end
+
+  test "handle_event adds a checkbox if one acronym is in the text" do
+    Worker.SlackWebApi.Reactions.MockClient
+    |> expect(:add, fn "question", %{} ->
+      {:ok}
+    end)
+    assert {:ok, state} = Worker.SlackBot.handle_event(message, slack, state)
   end
 
   defp message(%{} = options \\ %{}) do
     defaults = %{
       type: "message",
-      text: "You clicked the button",
+      text: "I need this by EOD.",
       channel: "my_channel",
       ts: "my_timestamp",
       user: %{
