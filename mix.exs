@@ -7,11 +7,11 @@ defmodule Worker.MixProject do
       version: "0.1.0",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps()
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger],
@@ -19,7 +19,11 @@ defmodule Worker.MixProject do
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  defp aliases do
+    [
+      test: "test --no-start",
+    ]
+  end
   defp deps do
     [
       {:distillery, "~> 1.5"},

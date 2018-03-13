@@ -1,4 +1,6 @@
 require Mox
+
+Application.ensure_all_started(:mox)
 Mox.defmock(Worker.DatabaseApi.MockClient, for: Worker.DatabaseApi)
 Mox.defmock(Worker.SlackWebApi.Chat.MockClient, for: Worker.SlackWebApi.Chat)
 Mox.defmock(Worker.SlackWebApi.Im.MockClient, for: Worker.SlackWebApi.Im)
