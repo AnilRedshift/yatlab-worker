@@ -30,12 +30,13 @@ defmodule Worker.Database do
 
   def update(%Result{team_id: team_id, time: time} = result) do
     current = Time.utc_now()
-    elapsed_seconds = Time.diff(current - time)
-    if elapsed_seconds > @cache_time_seconds do
-      IO.puts("Updating the cache for #{team_id}")
-      result = call(team_id)
+    elapsed_seconds = Time.diff(current, time)
+    case (elapsed_seconds) do
+      x when x in 0..@cache_time_seconds -> result
+      _ ->
+        IO.puts("Updating the cache for #{team_id}")
+        call(team_id)
     end
-    result
   end
 
   def call(team_id) do

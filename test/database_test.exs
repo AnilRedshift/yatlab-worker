@@ -76,12 +76,17 @@ defmodule DatabaseTest do
     stub_get_team()
 
     expected = %Result{
+      team_id: "team1",
+      time: "fake_time",
       name: "My Cool Team",
       acronyms: expected_acronyms(),
       credentials: expected_credentials(),
     }
 
-    assert Worker.Database.call(@team_id) == {:ok, expected}
+    assert {:ok, actual} = Worker.Database.call(@team_id)
+    actual = Map.put(actual, :time, "fake_time")
+
+    assert {:ok, actual} == {:ok, expected}
   end
 
   test "returns invalid_team when the team_id is invalid" do

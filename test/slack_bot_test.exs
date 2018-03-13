@@ -1,6 +1,6 @@
 defmodule SlackBotTest do
   import Mox
-  alias Worker.Database.{Credentials, Acronym}
+  alias Worker.Database.{Credentials, Acronym, Result}
   use ExUnit.Case
 
   @bot_id "bot_user_123"
@@ -138,7 +138,9 @@ defmodule SlackBotTest do
   end
 
   defp state do
-    %{
+    %Result{
+      time: Time.utc_now(),
+      team_id: @team_id,
       credentials: %Credentials{},
       acronyms: [
         %Acronym{
