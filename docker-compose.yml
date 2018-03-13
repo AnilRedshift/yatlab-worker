@@ -1,0 +1,11 @@
+version: '3'
+services:
+  worker:
+    image: yatlab-worker:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - ERLANG_COOKIE=${ERLANG_COOKIE}
+    env_file:
+      - .env

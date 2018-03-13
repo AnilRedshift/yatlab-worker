@@ -14,13 +14,16 @@ defmodule Worker.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {Worker.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:distillery, "~> 1.5"},
+      {:poison, "~> 3.1"},
       {:postgrex, "~> 0.13.5"},
       {:slack, git: "https://github.com/AnilRedshift/Elixir-Slack.git"},
       {:mox, "~> 0.3", only: :test},

@@ -14,17 +14,17 @@ end
 
 defmodule Worker.SlackWebApi.Impl do
   defmodule Chat do
-    @behavior Worker.SlackWebApi.Chat
+    @behaviour Worker.SlackWebApi.Chat
     def post_message(channel, text, optional_params), do: Slack.Web.Chat.post_message(channel, text, optional_params)
   end
 
   defmodule Im do
-    @behavior Worker.SlackWebApi.Im
+    @behaviour Worker.SlackWebApi.Im
     def open(user, optional_params), do: Slack.Web.Im.open(user, optional_params)
   end
 
   defmodule Reactions do
-    @behavior Worker.SlackWebApi.Reactions
+    @behaviour Worker.SlackWebApi.Reactions
     def add(name, optional_params), do: Slack.Web.Reactions.add(name, optional_params)
   end
 end

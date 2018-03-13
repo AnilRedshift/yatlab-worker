@@ -31,12 +31,10 @@ defmodule Worker.DatabaseApi.Postgres do
   end
 
   defp start do
-    uri = Application.get_env(:worker, :database_url) |> URI.parse
-    [username, password] = String.split(uri.userinfo, ":")
     Postgrex.start_link \
-      hostname: uri.host,
-      username: username,
-      password: password,
-      database: uri.path |> String.lstrip(?/)
+      hostname: Application.get_env(:worker, :db_host),
+      username: Application.get_env(:worker, :db_user),
+      password: Application.get_env(:worker, :db_password),
+      database: Application.get_env(:worker, :db_path)
   end
 end
