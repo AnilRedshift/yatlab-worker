@@ -37,6 +37,19 @@ defmodule Worker.Database do
     end
   end
 
+  def get_teams() do
+    with \
+      {:ok, %Postgrex.Result{rows: rows}} <- @database_api.get_teams()
+    do
+      Enum.map(rows, fn [team_id] -> team_id end) 
+    else
+      {:error, %Postgrex.Error{} = error} ->
+        {:error, %{code: "db_error", message: error.message}}
+      {:error, error} -> {:error, error}
+      _ -> {:error, %{code: "unknown"}}
+    end
+  end
+
   def call(team_id) do
     with \
       {:ok, acronym_data} <- @database_api.get_acronyms(team_id),

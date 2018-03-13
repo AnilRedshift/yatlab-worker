@@ -8,6 +8,8 @@ defmodule DatabaseTest do
   setup :verify_on_exit!
 
   @team_id "team1"
+  @other_team "team2"
+  @teams [@team_id, @other_team]
 
   defp stub_get_acronyms(rows \\ nil) do
     rows = rows || [
@@ -63,6 +65,18 @@ defmodule DatabaseTest do
     end)
   end
 
+  defp stub_get_teams(teams \\ @teams) do
+    rows = Enum.map(teams, fn team -> [team] end)
+    Worker.DatabaseApi.MockClient
+    |> expect(:get_teams, fn () ->
+      {:ok,
+      %Postgrex.Result{
+        columns: ["id"],
+        rows: rows
+      }}
+    end)
+  end
+
   defp expected_credentials do
     %Credentials{
       access_token: "xoxp-access-token",
@@ -102,5 +116,10 @@ defmodule DatabaseTest do
       {:error, %Postgrex.Error{message: "unexpected postgres status: idle"}}
     end)
     assert Worker.Database.call(@team_id) == {:error, %{code: "db_error", message: "unexpected postgres status: idle"}}
+  end
+
+  test "get_teams returns a list of team ids" do
+    stub_get_teams()
+    assert Worker.Database.get_teams() == @teams
   end
 end
