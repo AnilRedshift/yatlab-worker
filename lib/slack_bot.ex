@@ -5,6 +5,8 @@ defmodule Worker.SlackBot do
   @slack_web_chat_api Application.get_env(:worker, :slack_web_chat_api)
   @slack_web_im_api Application.get_env(:worker, :slack_web_im_api)
   @slack_web_reactions_api Application.get_env(:worker, :slack_web_reactions_api)
+  @slack_web_channels_api Application.get_env(:worker, :slack_web_channels_api)
+  @slack_web_groups_api Application.get_env(:worker, :slack_web_groups_api)
   @emoji "question"
 
   def handle_connect(slack, state) do
