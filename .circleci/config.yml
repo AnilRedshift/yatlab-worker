@@ -1,0 +1,75 @@
+defaults: &defaults
+  working_directory: ~/yatlab-worker
+  docker:
+    - image: elixir:1.6.3
+  environment:
+    - MIX_ENV: prod
+
+version: 2
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "mix.lock" }}
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: mix deps.get
+      - run: mix.compile
+
+      - save_cache:
+          key: dependency-cache-{{ checksum "mix.lock" }}
+          paths:
+            - deps
+            - _build
+
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "mix.lock" }}
+
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+      - run: mix deps.get
+      - run: mix.test
+
+      - save_cache:
+          key: dependency-cache-{{ checksum "mix.lock" }}
+          paths:
+            - node_modules
+
+  deploy:
+    <<: *defaults
+    docker:
+      - image: docker:latest
+    environment:
+      - IMAGE_NAME: "anilredshift/yatlab-worker"
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: docker build -t app .
+
+      - run: docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+      - run: docker tag app "anilredshift/yatlab:${CIRCLE_BUILD_NUM}"
+      - run: docker tag app "anilredshift/yatlab:latest"
+      - run: docker push "anilredshift/yatlab:${CIRCLE_BUILD_NUM}"
+      - run: docker push "anilredshift/yatlab:latest"
+
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - build
+      - test
+      - deploy:
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only: master
