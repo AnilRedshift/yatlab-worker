@@ -32,6 +32,15 @@ defmodule SlackBotTest do
     assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
   end
 
+  test "adds a checkbox if the acronym is lowercased" do
+    Worker.SlackWebApi.Reactions.MockClient
+    |> expect(:add, fn @reaction, %{} ->
+      {:ok}
+    end)
+    m = message(%{text: "The phrase eod is lowercased."})
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
+  end
+
   test "does not add the reaction when there are no acronyms in the text" do
     m = message(%{text: "There are no acronyms here"})
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
