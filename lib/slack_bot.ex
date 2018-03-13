@@ -15,8 +15,7 @@ defmodule Worker.SlackBot do
   end
 
   def handle_event(%{user: %{id: user_id}}, %{me: %{id: bot_id}}, state) when user_id == bot_id, do: {:ok, state}
-  def handle_event(%{type: "message", subtype: "bot_message"},_, state), do: {:ok, state}
-  def handle_event(%{type: "message", subtype: "message_replied"},_, state), do: {:ok, state}
+  def handle_event(%{type: "message", subtype: _},_, state), do: {:ok, state} # Ignore all specialized messages
   def handle_event(%{type: "message"} = message, _, state) do
     state = Worker.Database.update(state)
     if match?([_|_], Worker.MessageParser.parse(message.text, state.acronyms)) do
