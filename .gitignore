@@ -22,3 +22,6 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 worker-*.tar
 
+# While elixir doesn't use env files, it's still useful for getting
+# the shell in the correct place
+.env

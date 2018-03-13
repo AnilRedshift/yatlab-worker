@@ -1,4 +1,4 @@
-defmodule SlackMessager do
+defmodule Worker.SlackBot do
   use Slack
 
   @emoji "question"

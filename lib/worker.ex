@@ -1,6 +1,7 @@
 defmodule Worker do
   def hello do
-    {:ok, results} = Worker.Database.call("T028NREAQ")
-    Slack.Bot.start_link(SlackMessager, results, results.credentials.bot_access_token)
+    team_id = Application.get_env(:worker, :team_id)
+    {:ok, results} = Database.call(team_id)
+    Slack.Bot.start_link(SlackBot, results, results.credentials.bot_access_token)
   end
 end
