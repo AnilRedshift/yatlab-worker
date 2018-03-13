@@ -9,9 +9,10 @@ defmodule SlackMessager do
   end
 
   def handle_event(%{user: %{id: user_id}}, %{me: %{id: bot_id}}, state) when user_id == bot_id, do: {:ok, state}
+  def handle_event(%{type: "message", subtype: "bot_message"},_, state), do: {:ok, state}
   def handle_event(%{type: "message"} = message, _, state) do
     case message.text do
-      "Matt" ->
+      "You clicked the button" ->
         Slack.Web.Reactions.add(@emoji, %{token: token(state), channel: message.channel, timestamp: message.ts})
       _ -> {:ok}
     end
@@ -19,6 +20,7 @@ defmodule SlackMessager do
   end
 
   def handle_event(%{type: "reaction_added", reaction: reaction}, _, state) when reaction != @emoji, do: {:ok, state}
+  def handle_event(%{type: "reaction_added", item: %{channel: "D" <> _}}, _, state), do: {:ok, state}
   def handle_event(%{type: "reaction_added", item: %{type: "message"}} = message, _, state) do
     %{"channel" => %{"id" => channel_id}} = Slack.Web.Im.open(message.user, %{token: token(state)})
     Slack.Web.Chat.post_message(channel_id, "You clicked the button", %{token: token(state), as_user: false})
