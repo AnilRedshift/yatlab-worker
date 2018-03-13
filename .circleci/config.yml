@@ -16,7 +16,7 @@ jobs:
       - run: mix local.hex --force
       - run: mix local.rebar --force
       - run: mix deps.get
-      - run: mix.compile
+      - run: mix compile
 
       - save_cache:
           key: dependency-cache-{{ checksum "mix.lock" }}
@@ -34,7 +34,7 @@ jobs:
       - run: mix local.hex --force
       - run: mix local.rebar --force
       - run: mix deps.get
-      - run: mix.test
+      - run: mix test
 
       - save_cache:
           key: dependency-cache-{{ checksum "mix.lock" }}
