@@ -16,9 +16,9 @@ defmodule Worker.Database do
   defmodule Acronym do
     defstruct \
     id: nil,
-    name: nil,
-    means: nil,
-    description: nil,
+    name: "",
+    means: "",
+    description: "",
     team_id: nil,
     added_by: nil
   end
