@@ -26,6 +26,8 @@ jobs:
 
   test:
     <<: *defaults
+    environment:
+      - MIX_ENV: test
     steps:
       - checkout
       - restore_cache:
