@@ -26,7 +26,7 @@ defmodule DatabaseTest do
 
   defp expected_acronyms() do
     [
-      %Worker.Database.Acronym{
+      %Acronym{
         added_by: "Anil Kulkarni",
         description: "the dumbest acronym",
         id: 2,
@@ -34,7 +34,7 @@ defmodule DatabaseTest do
         name: "TLA",
         team_id: "team1"
       },
-      %Worker.Database.Acronym{
+      %Acronym{
         added_by: "Anil Kulkarni",
         description: "he's a ham",
         id: 6,
@@ -72,26 +72,26 @@ defmodule DatabaseTest do
   end
 
   test "returns team and acronym data on success" do
-    stub_get_acronyms
-    stub_get_team
+    stub_get_acronyms()
+    stub_get_team()
 
     expected = %Result{
       name: "My Cool Team",
-      acronyms: expected_acronyms,
-      credentials: expected_credentials,
+      acronyms: expected_acronyms(),
+      credentials: expected_credentials(),
     }
 
     assert Worker.Database.call(@team_id) == {:ok, expected}
   end
 
   test "returns invalid_team when the team_id is invalid" do
-    stub_get_acronyms
+    stub_get_acronyms()
     stub_get_team([])
     assert Worker.Database.call(@team_id) == {:error, %{code: "invalid_team"}}
   end
 
   test "returns db_error when postgres throws an error" do
-    stub_get_acronyms
+    stub_get_acronyms()
     Worker.DatabaseApi.MockClient
     |> expect(:get_team, fn @team_id ->
       {:error, %Postgrex.Error{message: "unexpected postgres status: idle"}}

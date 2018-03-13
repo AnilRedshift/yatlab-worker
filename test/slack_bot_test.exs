@@ -11,12 +11,12 @@ defmodule SlackBotTest do
 
   test "handle_event ignores messages sent from the bot" do
     m = message(%{user: %{ id: @bot_id }})
-    assert {:ok, state} = Worker.SlackBot.handle_event(m, slack, state)
+    assert {:ok, _} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
   test "handle_event ignores messages sent from another bot" do
     m = message(%{subtype: "bot_message"})
-    assert {:ok, state} = Worker.SlackBot.handle_event(m, slack, state)
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
   test "handle_event adds a checkbox if one acronym is in the text" do
@@ -24,12 +24,12 @@ defmodule SlackBotTest do
     |> expect(:add, fn "question", %{} ->
       {:ok}
     end)
-    assert {:ok, state} = Worker.SlackBot.handle_event(message, slack, state)
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
   end
 
   test "handle_event does not add the reaction when there are no acronyms in the text" do
     m = message(%{text: "There are no acronyms here"})
-    assert {:ok, state} = Worker.SlackBot.handle_event(message, slack, state)
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
   defp message(%{} = options \\ %{}) do
