@@ -28,13 +28,11 @@ defmodule Worker.Database do
   @database_api Application.get_env(:worker, :database_api)
   @cache_time_seconds 120
 
-  def update(%Result{team_id: team_id, time: time} = result) do
+  def update(%Result{time: time} = result) do
     current = Time.utc_now()
     elapsed_seconds = Time.diff(current, time)
     case (elapsed_seconds) do
-      t when t > @cache_time_seconds ->
-        IO.puts("Updating the cache for #{team_id}")
-        call(team_id)
+      t when t > @cache_time_seconds -> try_update(result)
       _ -> result
     end
   end
@@ -78,5 +76,17 @@ defmodule Worker.Database do
     Enum.map(rows, fn row ->
       Enum.zip(columns, row) |> Enum.into(%{})
     end)
+  end
+
+  defp try_update(state) do
+    case call(state.team_id) do
+      {:ok, results} ->
+        IO.puts("Updating the cache for #{state.team_id}")
+        results
+      e ->
+        IO.puts("Unable to update the cache")
+        IO.inspect(e)
+        state
+    end
   end
 end
