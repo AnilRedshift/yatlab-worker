@@ -8,6 +8,8 @@ defmodule Worker.Database do
 
   defmodule Result do
     defstruct \
+      team_id: nil,
+      time: nil,
       name: "",
       acronyms: [],
       credentials: %Credentials{}
@@ -24,6 +26,17 @@ defmodule Worker.Database do
   end
 
   @database_api Application.get_env(:worker, :database_api)
+  @cache_time_seconds 120
+
+  def update(%Result{team_id: team_id, time: time} = result) do
+    current = Time.utc_now()
+    elapsed_seconds = Time.diff(current - time)
+    if elapsed_seconds > @cache_time_seconds do
+      IO.puts("Updating the cache for #{team_id}")
+      result = call(team_id)
+    end
+    result
+  end
 
   def call(team_id) do
     with \
@@ -33,6 +46,8 @@ defmodule Worker.Database do
       {:ok, name, credentials} <- parse_team(team_data)
     do
       result = %Result{
+        team_id: team_id,
+        time: Time.utc_now(),
         acronyms: acronyms,
         name: name,
         credentials: credentials,
