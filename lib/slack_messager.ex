@@ -20,6 +20,7 @@ defmodule SlackMessager do
   end
 
   def handle_event(%{type: "reaction_added", reaction: reaction}, _, state) when reaction != @emoji, do: {:ok, state}
+  # All DM's start with D, ignore reactions added to direct messages
   def handle_event(%{type: "reaction_added", item: %{channel: "D" <> _}}, _, state), do: {:ok, state}
   def handle_event(%{type: "reaction_added", item: %{type: "message"}} = message, _, state) do
     %{"channel" => %{"id" => channel_id}} = Slack.Web.Im.open(message.user, %{token: token(state)})
