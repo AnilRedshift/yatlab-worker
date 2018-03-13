@@ -5,7 +5,7 @@ config :worker,
   database_api: Worker.DatabaseApi.Postgres,
   slack_web_chat_api: Worker.SlackWebApi.Impl.Chat,
   slack_web_im_api: Worker.SlackWebApi.Impl.Im,
-  slack_web_reactions_api: Worker.SlackWebApi.Reactions,
+  slack_web_reactions_api: Worker.SlackWebApi.Impl.Reactions,
   team_id: System.get_env("TEAM_ID")
 
 import_config "#{Mix.env}.exs"
