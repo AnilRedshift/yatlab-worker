@@ -42,6 +42,11 @@ defmodule SlackBotTest do
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
+  test "ignores matches within URL's" do
+    m = message(%{text: "The phrase http://eod.com is in a url"})
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
+  end
+
   test "does not add the reaction when there are no acronyms in the text" do
     m = message(%{text: "There are no acronyms here"})
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
