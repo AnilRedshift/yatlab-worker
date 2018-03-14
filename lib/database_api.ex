@@ -24,21 +24,5 @@ defmodule Worker.DatabaseApi.Postgres do
     execute("SELECT id from teams", [])
   end
 
-  defp execute(query, params) do
-    with {:ok, conn} <- start(),
-         {:ok, results} <- Postgrex.query(conn, query, params) do
-      {:ok, results}
-    else
-      error -> error
-    end
-  end
-
-  defp start do
-    Postgrex.start_link(
-      hostname: Application.get_env(:worker, :db_host),
-      username: Application.get_env(:worker, :db_user),
-      password: Application.get_env(:worker, :db_password),
-      database: Application.get_env(:worker, :db_path)
-    )
-  end
+  defp execute(query, params), do: Postgrex.query(:app_database, query, params)
 end
