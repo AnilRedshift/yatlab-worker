@@ -3,8 +3,9 @@ defmodule TeamMonitor do
 
   # 1 minute in milliseconds
   @delay 60000
+  @no_teams MapSet.new()
   def start_link(_) do
-    GenServer.start_link(__MODULE__, MapSet.new())
+    GenServer.start_link(__MODULE__, @no_teams)
   end
 
   def init(state) do
@@ -23,16 +24,18 @@ defmodule TeamMonitor do
     Process.send_after(self(), :update, delay)
   end
 
+  defp start(teams) when teams == @no_teams, do: IO.puts("No new teams")
+
   defp start(teams) do
     teams
     |> Enum.each(fn team ->
+      IO.puts("Starting worker for #{team}")
       {:ok, _} = DynamicSupervisor.start_child(Worker.Supervisor, {Worker, team})
     end)
   end
 
   defp update(state) do
     teams = get_teams()
-    IO.puts("Polling for new teams")
 
     teams
     |> MapSet.difference(state)
