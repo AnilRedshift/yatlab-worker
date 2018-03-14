@@ -14,7 +14,7 @@ defmodule Worker.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :runtime_tools, :observer, :wx],
       mod: {Worker.Application, []}
     ]
   end
