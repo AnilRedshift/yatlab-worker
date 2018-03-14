@@ -96,6 +96,9 @@ defmodule Worker.SlackBot do
   end
 
   defp send_acronym(text, %{user: user, item: %{channel: channel}}, state) do
-    @slack_web_chat_api.post_ephemeral(channel, text, user, %{token: bot_token(state), as_user: false})
+    @slack_web_chat_api.post_ephemeral(channel, text, user, %{
+      token: bot_token(state),
+      as_user: false
+    })
   end
 end
