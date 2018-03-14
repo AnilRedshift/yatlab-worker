@@ -55,6 +55,9 @@ defmodule Worker.SlackBot do
   defp bot_token(state), do: state.credentials.bot_access_token
   defp web_token(state), do: state.credentials.access_token
 
+  defp get_text(%{"messages" => []}), do: ""
+  defp get_text(%{"messages" => [%{"text" => text} | _]}), do: text
+
   defp get_text(%{item: %{ts: ts, channel: "G" <> _ = group}}, state) do
     get_text(@slack_web_groups_api.replies(group, ts, %{token: web_token(state)}))
   end
@@ -62,9 +65,6 @@ defmodule Worker.SlackBot do
   defp get_text(%{item: %{ts: ts, channel: channel}}, state) do
     get_text(@slack_web_channels_api.replies(channel, ts, %{token: web_token(state)}))
   end
-
-  defp get_text(%{"messages" => []}), do: ""
-  defp get_text(%{"messages" => [%{"text" => text}]}), do: text
 
   defp send_acronyms([], _, _), do: nil
 
