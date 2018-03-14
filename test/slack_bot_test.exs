@@ -15,7 +15,7 @@ defmodule SlackBotTest do
   setup :verify_on_exit!
 
   test "ignores messages sent from the bot" do
-    m = message(%{user: %{ id: @bot_id }})
+    m = message(%{user: %{id: @bot_id}})
     assert {:ok, _} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
@@ -29,6 +29,7 @@ defmodule SlackBotTest do
     |> expect(:add, fn @reaction, %{} ->
       {:ok}
     end)
+
     assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
   end
 
@@ -37,6 +38,7 @@ defmodule SlackBotTest do
     |> expect(:add, fn @reaction, %{} ->
       {:ok}
     end)
+
     m = message(%{text: "The phrase eod is lowercased."})
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
@@ -57,40 +59,41 @@ defmodule SlackBotTest do
     setup_groups_replies_mock()
     setup_im_open_mock()
     setup_chat_post_message_mock()
-    m = reaction_message(
-      %{
+
+    m =
+      reaction_message(%{
         item: %{
           type: "message",
           ts: @ts,
-          channel: @group,
+          channel: @group
         }
-      }
-    )
+      })
+
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
   defp setup_channels_replies_mock(text \\ "I need this by EOD.") do
     Worker.SlackWebApi.Channels.MockClient
-    |> expect(:replies, fn (@channel, @ts, _) ->
+    |> expect(:replies, fn @channel, @ts, _ ->
       %{
         "messages" => [
           %{
-            "text" => text,
-          },
-        ],
+            "text" => text
+          }
+        ]
       }
     end)
   end
 
   defp setup_groups_replies_mock(text \\ "I need this by EOD.") do
     Worker.SlackWebApi.Groups.MockClient
-    |> expect(:replies, fn (@group, @ts, _) ->
+    |> expect(:replies, fn @group, @ts, _ ->
       %{
         "messages" => [
           %{
-            "text" => text,
-          },
-        ],
+            "text" => text
+          }
+        ]
       }
     end)
   end
@@ -100,15 +103,15 @@ defmodule SlackBotTest do
     |> expect(:open, fn ^user_id, _ ->
       %{
         "channel" => %{
-          "id" => @dm_channel,
-        },
+          "id" => @dm_channel
+        }
       }
     end)
   end
 
   defp setup_chat_post_message_mock() do
     Worker.SlackWebApi.Chat.MockClient
-    |> expect(:post_message, fn(@dm_channel, _, _) -> {:ok} end)
+    |> expect(:post_message, fn @dm_channel, _, _ -> {:ok} end)
   end
 
   defp reaction_message(%{} = options \\ %{}) do
@@ -118,10 +121,11 @@ defmodule SlackBotTest do
       item: %{
         type: "message",
         ts: @ts,
-        channel: @channel,
+        channel: @channel
       },
-      user: @user_id,
+      user: @user_id
     }
+
     Map.merge(defaults, options)
   end
 
@@ -133,16 +137,17 @@ defmodule SlackBotTest do
       ts: @ts,
       user: %{
         id: @user_id
-      },
+      }
     }
+
     Map.merge(defaults, options)
   end
 
   defp slack do
     %{
       me: %{
-        id: @bot_id,
-      },
+        id: @bot_id
+      }
     }
   end
 
@@ -158,7 +163,7 @@ defmodule SlackBotTest do
           means: "End of day",
           description: "",
           team_id: @team_id,
-          added_by: "Ada",
+          added_by: "Ada"
         },
         %Acronym{
           id: 0,
@@ -166,9 +171,9 @@ defmodule SlackBotTest do
           means: "Train human really obey wishes",
           description: "Dogs want you to throw the ball",
           team_id: @team_id,
-          added_by: "Ada",
-        },
-      ],
+          added_by: "Ada"
+        }
+      ]
     }
   end
 end

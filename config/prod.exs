@@ -1,4 +1,3 @@
 use Mix.Config
 
-config :worker,
-  prod: true
+config :worker, prod: true

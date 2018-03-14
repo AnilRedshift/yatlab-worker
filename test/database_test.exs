@@ -12,17 +12,20 @@ defmodule DatabaseTest do
   @teams [@team_id, @other_team]
 
   defp stub_get_acronyms(rows \\ nil) do
-    rows = rows || [
-      [2, "TLA", "three letter acronym", "the dumbest acronym", @team_id,
-      "Anil Kulkarni"],
-      [6, "HAM", "Jordan", "he's a ham", @team_id, "Anil Kulkarni"],
-    ]
+    rows =
+      rows ||
+        [
+          [2, "TLA", "three letter acronym", "the dumbest acronym", @team_id, "Anil Kulkarni"],
+          [6, "HAM", "Jordan", "he's a ham", @team_id, "Anil Kulkarni"]
+        ]
+
     Worker.DatabaseApi.MockClient
     |> expect(:get_acronyms, fn @team_id ->
-      {:ok, %Postgrex.Result{
-        columns: ["id", "name", "means", "description", "team_id", "added_by"],
-        rows: rows
-      }}
+      {:ok,
+       %Postgrex.Result{
+         columns: ["id", "name", "means", "description", "team_id", "added_by"],
+         rows: rows
+       }}
     end)
   end
 
@@ -43,37 +46,37 @@ defmodule DatabaseTest do
         means: "Jordan",
         name: "HAM",
         team_id: "team1"
-      },
+      }
     ]
   end
 
   defp stub_get_team(rows \\ nil) do
-    rows = rows || [
-      [@team_id,
-      "xoxp-access-token",
-      "UBOTUSERID",
-      "xoxb-bot-token",
-      "My Cool Team"]
-    ]
+    rows =
+      rows ||
+        [
+          [@team_id, "xoxp-access-token", "UBOTUSERID", "xoxb-bot-token", "My Cool Team"]
+        ]
+
     Worker.DatabaseApi.MockClient
     |> expect(:get_team, fn @team_id ->
       {:ok,
-      %Postgrex.Result{
-        columns: ["id", "access_token", "bot_user_id", "bot_access_token", "name"],
-        rows: rows
-      }}
+       %Postgrex.Result{
+         columns: ["id", "access_token", "bot_user_id", "bot_access_token", "name"],
+         rows: rows
+       }}
     end)
   end
 
   defp stub_get_teams(teams \\ @teams) do
     rows = Enum.map(teams, fn team -> [team] end)
+
     Worker.DatabaseApi.MockClient
-    |> expect(:get_teams, fn () ->
+    |> expect(:get_teams, fn ->
       {:ok,
-      %Postgrex.Result{
-        columns: ["id"],
-        rows: rows
-      }}
+       %Postgrex.Result{
+         columns: ["id"],
+         rows: rows
+       }}
     end)
   end
 
@@ -81,7 +84,7 @@ defmodule DatabaseTest do
     %Credentials{
       access_token: "xoxp-access-token",
       bot_user_id: "UBOTUSERID",
-      bot_access_token: "xoxb-bot-token",
+      bot_access_token: "xoxb-bot-token"
     }
   end
 
@@ -94,7 +97,7 @@ defmodule DatabaseTest do
       time: "fake_time",
       name: "My Cool Team",
       acronyms: expected_acronyms(),
-      credentials: expected_credentials(),
+      credentials: expected_credentials()
     }
 
     assert {:ok, actual} = Worker.Database.call(@team_id)
@@ -111,11 +114,14 @@ defmodule DatabaseTest do
 
   test "returns db_error when postgres throws an error" do
     stub_get_acronyms()
+
     Worker.DatabaseApi.MockClient
     |> expect(:get_team, fn @team_id ->
       {:error, %Postgrex.Error{message: "unexpected postgres status: idle"}}
     end)
-    assert Worker.Database.call(@team_id) == {:error, %{code: "db_error", message: "unexpected postgres status: idle"}}
+
+    assert Worker.Database.call(@team_id) ==
+             {:error, %{code: "db_error", message: "unexpected postgres status: idle"}}
   end
 
   test "get_teams returns a list of team ids" do

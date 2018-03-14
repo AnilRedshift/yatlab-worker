@@ -21,16 +21,17 @@ defmodule Worker.MixProject do
 
   defp aliases do
     [
-      test: "test --no-start",
+      test: "test --no-start"
     ]
   end
+
   defp deps do
     [
       {:distillery, "~> 1.5"},
       {:poison, "~> 3.1"},
       {:postgrex, "~> 0.13.5"},
       {:slack, git: "https://github.com/AnilRedshift/Elixir-Slack.git"},
-      {:mox, "~> 0.3", only: :test},
+      {:mox, "~> 0.3", only: :test}
     ]
   end
 end

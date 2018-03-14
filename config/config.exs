@@ -13,4 +13,4 @@ config :worker,
   slack_web_reactions_api: Worker.SlackWebApi.Impl.Reactions,
   team_id: "${TEAM_ID}"
 
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

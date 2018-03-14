@@ -25,10 +25,8 @@ defmodule Worker.DatabaseApi.Postgres do
   end
 
   defp execute(query, params) do
-    with \
-      {:ok, conn} <- start(),
-      {:ok, results} <- Postgrex.query(conn, query, params)
-    do
+    with {:ok, conn} <- start(),
+         {:ok, results} <- Postgrex.query(conn, query, params) do
       {:ok, results}
     else
       error -> error
@@ -36,10 +34,11 @@ defmodule Worker.DatabaseApi.Postgres do
   end
 
   defp start do
-    Postgrex.start_link \
+    Postgrex.start_link(
       hostname: Application.get_env(:worker, :db_host),
       username: Application.get_env(:worker, :db_user),
       password: Application.get_env(:worker, :db_password),
       database: Application.get_env(:worker, :db_path)
+    )
   end
 end
