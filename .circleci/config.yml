@@ -11,7 +11,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - mix format --check-formatted
+      - run: mix format --check-formatted
       - restore_cache:
           key: dependency-cache-{{ checksum "mix.lock" }}
       - run: mix local.hex --force
