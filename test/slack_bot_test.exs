@@ -24,20 +24,12 @@ defmodule SlackBotTest do
   end
 
   test "adds a checkbox if one acronym is in the text" do
-    Worker.SlackWebApi.Reactions.MockClient
-    |> expect(:add, fn @reaction, %{} ->
-      {:ok}
-    end)
-
+    setup_reactions_add_mock()
     assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
   end
 
   test "adds a checkbox if the acronym is lowercased" do
-    Worker.SlackWebApi.Reactions.MockClient
-    |> expect(:add, fn @reaction, %{} ->
-      {:ok}
-    end)
-
+    setup_reactions_add_mock()
     m = message(%{text: "The phrase eod is lowercased."})
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
@@ -74,15 +66,17 @@ defmodule SlackBotTest do
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
 
-  defp setup_channels_replies_mock(text \\ "I need this by EOD.") do
+  test "Sends a DM when there are multiple replies to the thread" do
+    setup_channels_replies_mock(["I need this by EOD.", "This message has many replies"])
+    setup_chat_post_message_mock()
+    assert {:ok, %{}} = Worker.SlackBot.handle_event(reaction_message(), slack(), state())
+  end
+
+  defp setup_channels_replies_mock(replies \\ ["I need this by EOD."]) do
     Worker.SlackWebApi.Channels.MockClient
     |> expect(:replies, fn @channel, @ts, _ ->
       %{
-        "messages" => [
-          %{
-            "text" => text
-          }
-        ]
+        "messages" => Enum.map(replies, fn reply -> %{"text" => reply} end),
       }
     end)
   end
@@ -103,6 +97,13 @@ defmodule SlackBotTest do
   defp setup_chat_post_message_mock(channel \\ @channel) do
     Worker.SlackWebApi.Chat.MockClient
     |> expect(:post_ephemeral, fn channel, _, @user_id, _ -> {:ok} end)
+  end
+
+  def setup_reactions_add_mock() do
+    Worker.SlackWebApi.Reactions.MockClient
+    |> expect(:add, fn @reaction, %{} ->
+      {:ok}
+    end)
   end
 
   defp reaction_message(%{} = options \\ %{}) do

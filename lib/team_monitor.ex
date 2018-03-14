@@ -8,7 +8,7 @@ defmodule TeamMonitor do
   end
 
   def init(state) do
-    poll(0)
+    poll(100)
     {:ok, state}
   end
 
@@ -22,8 +22,6 @@ defmodule TeamMonitor do
   defp poll(delay \\ @delay) do
     Process.send_after(self(), :update, delay)
   end
-
-  defp start([]), do: IO.puts("No new teams")
 
   defp start(teams) do
     teams
