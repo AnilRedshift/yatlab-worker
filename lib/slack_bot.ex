@@ -3,7 +3,6 @@ defmodule Worker.SlackBot do
   alias Worker.Database.Acronym
 
   @slack_web_chat_api Application.get_env(:worker, :slack_web_chat_api)
-  @slack_web_im_api Application.get_env(:worker, :slack_web_im_api)
   @slack_web_reactions_api Application.get_env(:worker, :slack_web_reactions_api)
   @slack_web_channels_api Application.get_env(:worker, :slack_web_channels_api)
   @slack_web_groups_api Application.get_env(:worker, :slack_web_groups_api)
@@ -46,7 +45,7 @@ defmodule Worker.SlackBot do
     state = Worker.Database.update(state)
     text = get_text(message, state)
     acronyms = Worker.MessageParser.parse(text, state.acronyms)
-    send_acronyms(acronyms, message.user, state)
+    send_acronyms(acronyms, message, state)
     {:ok, state}
   end
 
@@ -71,35 +70,32 @@ defmodule Worker.SlackBot do
 
   defp send_acronyms(
          [%Acronym{name: name, means: "", description: description} | acronyms],
-         user,
+         message,
          state
        ) do
-    send_acronym("#{name}: #{description}", user, state)
-    send_acronyms(acronyms, user, state)
+    send_acronym("#{name}: #{description}", message, state)
+    send_acronyms(acronyms, message, state)
   end
 
   defp send_acronyms(
          [%Acronym{name: name, means: means, description: ""} | acronyms],
-         user,
+         message,
          state
        ) do
-    send_acronym("#{name} stands for #{means}.", user, state)
-    send_acronyms(acronyms, user, state)
+    send_acronym("#{name} stands for #{means}.", message, state)
+    send_acronyms(acronyms, message, state)
   end
 
   defp send_acronyms(
          [%Acronym{name: name, means: means, description: description} | acronyms],
-         user,
+         message,
          state
        ) do
-    send_acronym("#{name} stands for #{means}. Description: #{description}", user, state)
-    send_acronyms(acronyms, user, state)
+    send_acronym("#{name} stands for #{means}. Description: #{description}", message, state)
+    send_acronyms(acronyms, message, state)
   end
 
-  defp send_acronym(text, user, state) do
-    %{"channel" => %{"id" => channel_id}} =
-      @slack_web_im_api.open(user, %{token: bot_token(state)})
-
-    @slack_web_chat_api.post_message(channel_id, text, %{token: bot_token(state), as_user: false})
+  defp send_acronym(text, %{user: user, item: %{channel: channel}}, state) do
+    @slack_web_chat_api.post_ephemeral(channel, text, user, %{token: bot_token(state), as_user: false})
   end
 end

@@ -5,8 +5,8 @@ defmodule Worker.SlackWebApi do
   end
 
   defmodule Chat do
-    @callback post_message(channel :: String.t(), text :: String.t(), optional_params :: Map.t()) ::
-                Map.t()
+    @callback post_message(channel :: String.t(), text :: String.t(), optional_params :: Map.t()) :: Map.t()
+    @callback post_ephemeral(channel :: String.t(), text :: String.t(), user :: String.t(), optional_params :: Map.t()) :: Map.t()
   end
 
   defmodule Groups do
@@ -34,6 +34,8 @@ defmodule Worker.SlackWebApi.Impl do
     @behaviour Worker.SlackWebApi.Chat
     def post_message(channel, text, optional_params),
       do: Slack.Web.Chat.post_message(channel, text, optional_params)
+    def post_ephemeral(channel, text, user, optional_params),
+      do: Slack.Web.Chat.post_ephemeral(channel, text, user, optional_params)
   end
 
   defmodule Groups do

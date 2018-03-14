@@ -6,7 +6,6 @@ defmodule SlackBotTest do
   @bot_id "bot_user_123"
   @user_id "real_user_345"
   @team_id "team_id_999"
-  @dm_channel "D789"
   @channel "C123"
   @group "G456"
   @reaction "question"
@@ -50,15 +49,13 @@ defmodule SlackBotTest do
 
   test "sends a DM when the question emoji is clicked in a channel" do
     setup_channels_replies_mock()
-    setup_im_open_mock()
     setup_chat_post_message_mock()
     assert {:ok, %{}} = Worker.SlackBot.handle_event(reaction_message(), slack(), state())
   end
 
   test "sends a DM when the question emoji is clicked in a group message" do
     setup_groups_replies_mock()
-    setup_im_open_mock()
-    setup_chat_post_message_mock()
+    setup_chat_post_message_mock(@group)
 
     m =
       reaction_message(%{
@@ -98,20 +95,9 @@ defmodule SlackBotTest do
     end)
   end
 
-  defp setup_im_open_mock(user_id \\ @user_id) do
-    Worker.SlackWebApi.Im.MockClient
-    |> expect(:open, fn ^user_id, _ ->
-      %{
-        "channel" => %{
-          "id" => @dm_channel
-        }
-      }
-    end)
-  end
-
-  defp setup_chat_post_message_mock() do
+  defp setup_chat_post_message_mock(channel \\ @channel) do
     Worker.SlackWebApi.Chat.MockClient
-    |> expect(:post_message, fn @dm_channel, _, _ -> {:ok} end)
+    |> expect(:post_ephemeral, fn channel, _, @user_id, _ -> {:ok} end)
   end
 
   defp reaction_message(%{} = options \\ %{}) do
