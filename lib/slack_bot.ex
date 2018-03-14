@@ -9,7 +9,7 @@ defmodule Worker.SlackBot do
   @slack_web_groups_api Application.get_env(:worker, :slack_web_groups_api)
   @emoji "question"
 
-  def handle_connect(slack, state) do
+  def handle_connect(_, state) do
     IO.puts("Slack bot connected to team #{state.team_id}")
     {:ok, state}
   end

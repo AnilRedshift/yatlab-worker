@@ -1,7 +1,8 @@
 defmodule TeamMonitor do
   use GenServer
 
-  @delay 60000 # 1 minute in milliseconds
+  # 1 minute in milliseconds
+  @delay 60000
   def start_link(_) do
     GenServer.start_link(__MODULE__, MapSet.new())
   end
@@ -23,6 +24,7 @@ defmodule TeamMonitor do
   end
 
   defp start([]), do: IO.puts("No new teams")
+
   defp start(teams) do
     teams
     |> Enum.each(fn team ->
@@ -33,6 +35,7 @@ defmodule TeamMonitor do
   defp update(state) do
     teams = get_teams()
     IO.puts("Polling for new teams")
+
     teams
     |> MapSet.difference(state)
     |> start

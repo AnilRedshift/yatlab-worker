@@ -8,6 +8,7 @@ defmodule Worker.Application do
       {DynamicSupervisor, name: Worker.Supervisor, strategy: :one_for_one},
       {TeamMonitor, []}
     ]
-    Supervisor.start_link(children, [strategy: :one_for_one])
+
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end
