@@ -10,7 +10,7 @@ defmodule Worker.SlackBot do
   @emoji "question"
 
   def handle_connect(slack, state) do
-    IO.puts("#{slack.me.name} connected!")
+    IO.puts("Slack bot connected to team #{state.team_id}")
     {:ok, state}
   end
 
