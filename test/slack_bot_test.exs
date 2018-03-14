@@ -76,7 +76,7 @@ defmodule SlackBotTest do
     Worker.SlackWebApi.Channels.MockClient
     |> expect(:replies, fn @channel, @ts, _ ->
       %{
-        "messages" => Enum.map(replies, fn reply -> %{"text" => reply} end),
+        "messages" => Enum.map(replies, fn reply -> %{"text" => reply} end)
       }
     end)
   end
