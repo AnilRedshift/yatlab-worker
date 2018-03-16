@@ -22,6 +22,8 @@ defmodule Worker.SlackWebApi do
 
   defmodule Im do
     @callback open(user :: String.t(), optional_params :: Map.t()) :: Map.t()
+    @callback replies(channel :: String.t(), thread_ts :: String.t(), optional_params :: Map.t()) ::
+                Map.t()
   end
 
   defmodule Reactions do
@@ -54,6 +56,9 @@ defmodule Worker.SlackWebApi.Impl do
   defmodule Im do
     @behaviour Worker.SlackWebApi.Im
     def open(user, optional_params), do: Slack.Web.Im.open(user, optional_params)
+
+    def replies(channel, thread_ts, optional_params),
+      do: Slack.Web.Im.replies(channel, thread_ts, optional_params)
   end
 
   defmodule Reactions do

@@ -6,7 +6,9 @@ defmodule Worker.SlackBot do
   @slack_web_reactions_api Application.get_env(:worker, :slack_web_reactions_api)
   @slack_web_channels_api Application.get_env(:worker, :slack_web_channels_api)
   @slack_web_groups_api Application.get_env(:worker, :slack_web_groups_api)
+  @slack_web_im_api Application.get_env(:worker, :slack_web_im_api)
   @emoji "question"
+  @help_text "Hi! To use yatlab, simply invite me to one of your channels. When I see any of the acronyms listed at <https://yatlab.terminal.space/>. I will add a :question: reaction. If any user clicks the :question:, I'll respond. Give it a shot!"
 
   def handle_connect(_, state) do
     IO.puts("Slack bot connected to team #{state.team_id}")
@@ -18,6 +20,22 @@ defmodule Worker.SlackBot do
 
   # Ignore all specialized messages
   def handle_event(%{type: "message", subtype: _}, _, state), do: {:ok, state}
+
+  def handle_event(%{type: "message", text: "help", channel: "D" <> _ = channel}, _, state) do
+    %{"message" => %{"ts" => response_ts}} =
+      @slack_web_chat_api.post_message(channel, @help_text, %{
+        token: bot_token(state),
+        as_user: false
+      })
+
+    @slack_web_reactions_api.add(@emoji, %{
+      token: bot_token(state),
+      channel: channel,
+      timestamp: response_ts
+    })
+
+    {:ok, state}
+  end
 
   def handle_event(%{type: "message"} = message, _, state) do
     state = Worker.Database.update(state)
@@ -37,19 +55,29 @@ defmodule Worker.SlackBot do
       when reaction != @emoji,
       do: {:ok, state}
 
-  # All DM's start with D, ignore reactions added to direct messages
-  def handle_event(%{type: "reaction_added", item: %{channel: "D" <> _}}, _, state),
-    do: {:ok, state}
-
   def handle_event(%{type: "reaction_added", item: %{type: "message"}} = message, _, state) do
     state = Worker.Database.update(state)
     text = get_text(message, state)
-    acronyms = Worker.MessageParser.parse(text, state.acronyms)
-    send_acronyms(acronyms, message, state)
+    handle_reaction(message, text, state)
     {:ok, state}
   end
 
   def handle_event(_, _, state), do: {:ok, state}
+
+  def handle_reaction(%{user: user, item: %{channel: "D" <> _ = channel}}, @help_text, state) do
+    response = "TEST stands for ... well this is just a test! Try it with other acronyms"
+
+    @slack_web_chat_api.post_ephemeral(channel, response, user, %{
+      token: bot_token(state),
+      as_user: false
+    })
+  end
+
+  def handle_reaction(message, text, state) do
+    acronyms = Worker.MessageParser.parse(text, state.acronyms)
+    send_acronyms(acronyms, message, state)
+  end
+
   def handle_info(_, _, state), do: {:ok, state}
 
   defp bot_token(state), do: state.credentials.bot_access_token
@@ -58,12 +86,17 @@ defmodule Worker.SlackBot do
   defp get_text(%{"messages" => []}), do: ""
   defp get_text(%{"messages" => [%{"text" => text} | _]}), do: text
 
-  defp get_text(%{item: %{ts: ts, channel: "G" <> _ = group}}, state) do
-    get_text(@slack_web_groups_api.replies(group, ts, %{token: web_token(state)}))
-  end
-
   defp get_text(%{item: %{ts: ts, channel: channel}}, state) do
-    get_text(@slack_web_channels_api.replies(channel, ts, %{token: web_token(state)}))
+    params = %{token: web_token(state)}
+
+    replies =
+      case channel do
+        "D" <> _ -> @slack_web_im_api.replies(channel, ts, params)
+        "G" <> _ -> @slack_web_groups_api.replies(channel, ts, params)
+        _ -> @slack_web_channels_api.replies(channel, ts, params)
+      end
+
+    get_text(replies)
   end
 
   defp send_acronyms([], _, _), do: nil
