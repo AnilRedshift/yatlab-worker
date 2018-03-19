@@ -21,33 +21,14 @@ defmodule Worker.SlackBot do
   # Ignore all specialized messages
   def handle_event(%{type: "message", subtype: _}, _, state), do: {:ok, state}
 
-  def handle_event(%{type: "message", text: "help", channel: "D" <> _ = channel}, _, state) do
-    %{"message" => %{"ts" => response_ts}} =
-      @slack_web_chat_api.post_message(channel, @help_text, %{
-        token: bot_token(state),
-        as_user: false
-      })
+  def handle_event(%{type: "message", channel: "D" <> _} = message, slack, state), do: handle_dm(message, slack, state)
 
-    @slack_web_reactions_api.add(@emoji, %{
-      token: bot_token(state),
-      channel: channel,
-      timestamp: response_ts
-    })
-
-    {:ok, state}
-  end
-
-  def handle_event(%{type: "message"} = message, _, state) do
+  def handle_event(%{type: "message", channel: channel} = message, _, state) do
     state = Worker.Database.update(state)
-
-    if match?([_ | _], Worker.MessageParser.parse(message.text, state.acronyms)) do
-      @slack_web_reactions_api.add(@emoji, %{
-        token: bot_token(state),
-        channel: message.channel,
-        timestamp: message.ts
-      })
+    case (channel) do
+      "D" <> _ -> Worker.DmHandler.handle_dm(channel, state)
+      _ -> handle_message(message, state)
     end
-
     {:ok, state}
   end
 
@@ -133,5 +114,15 @@ defmodule Worker.SlackBot do
       token: bot_token(state),
       as_user: false
     })
+  end
+
+  defp handle_message(%{text: text, channel: channel, ts: ts}, state) do
+    if match?([_ | _], Worker.MessageParser.parse(text, state.acronyms)) do
+      @slack_web_reactions_api.add(@emoji, %{
+        token: bot_token(state),
+        channel: channel,
+        timestamp: ts
+      })
+    end
   end
 end
