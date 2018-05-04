@@ -4,9 +4,11 @@ defmodule Worker.DatabaseApi do
   @callback get_teams() :: {:ok, %Postgrex.Result{}}
 end
 
+
 defmodule Worker.DatabaseApi.Postgres do
   require Postgrex
   @behaviour Worker.DatabaseApi
+  @version 2
 
   def get_acronyms(team_id) do
     query = "SELECT * from acronyms WHERE team_id = $1"
@@ -21,7 +23,7 @@ defmodule Worker.DatabaseApi.Postgres do
   end
 
   def get_teams() do
-    execute("SELECT id from teams", [])
+    execute("SELECT id from teams where version = $1", [@version])
   end
 
   defp execute(query, params), do: Postgrex.query(:app_database, query, params)
