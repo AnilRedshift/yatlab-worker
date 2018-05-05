@@ -14,20 +14,22 @@ defmodule Worker do
   end
 
   def init(team_id) do
-    IO.puts("Worker running for #{team_id}")
     {:ok, results} = Worker.Database.call(team_id)
 
     Slack.Bot.start_link(Worker.SlackBot, results, results.credentials.bot_access_token)
     |> handle_errors(team_id)
   end
 
-  defp handle_errors({:ok, _} = response, _team), do: response
+  defp handle_errors({:ok, _} = response, team) do
+    IO.puts("Worker running for #{team}")
+    response
+  end
 
-  defp handle_errors({:error, "Slack API returned an error `invalid_auth" <> _}, team),
-    do: reset(team)
+  defp handle_errors({:error, "Slack API returned an error `invalid_auth" <> _ = message}, team),
+    do: reset(team, message)
 
-  defp handle_errors({:error, "Slack API returned an error `account_inactive" <> _}, team),
-    do: reset(team)
+  defp handle_errors({:error, "Slack API returned an error `account_inactive" <> _ = message}, team),
+    do: reset(team, message)
 
   defp handle_errors(response, team) do
     IO.puts("UNEXPECTED response from start_link for #{team}")
@@ -35,7 +37,8 @@ defmodule Worker do
     :ignore
   end
 
-  defp reset(team) do
+  defp reset(team, message) do
+    IO.puts("Starting team #{team} failed: #{message}")
     IO.puts("Resetting the version_id for #{team} to 0")
     Worker.Database.reset_version(team)
     :ignore
