@@ -2,6 +2,7 @@ defmodule Worker.DatabaseApi do
   @callback get_acronyms(team_id :: String.t()) :: {:ok, %Postgrex.Result{}}
   @callback get_team(team_id :: String.t()) :: {:ok, %Postgrex.Result{}}
   @callback get_teams() :: {:ok, %Postgrex.Result{}}
+  @callback reset_version(team_id :: String.t()) :: {:ok, %Postgrex.Result{}}
 end
 
 
@@ -24,6 +25,12 @@ defmodule Worker.DatabaseApi.Postgres do
 
   def get_teams() do
     execute("SELECT id from teams where version = $1", [@version])
+  end
+
+  def reset_version(team_id) do
+    query = "UPDATE teams SET version = 0 WHERE id = $1"
+    params = [team_id]
+    execute(query, params);
   end
 
   defp execute(query, params), do: Postgrex.query(:app_database, query, params)

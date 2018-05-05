@@ -50,6 +50,10 @@ defmodule Worker.Database do
     end
   end
 
+  def reset_version(team_id) do
+    @database_api.reset_version(team_id)
+  end
+
   def call(team_id) do
     with {:ok, acronym_data} <- @database_api.get_acronyms(team_id),
          {:ok, team_data} <- @database_api.get_team(team_id),
