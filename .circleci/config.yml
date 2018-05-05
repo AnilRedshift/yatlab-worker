@@ -56,7 +56,7 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - run: docker build -t app .
-      - run: docker login --username "${DOCKER_USERNAME}" --password "${DOCKER_PASSWORD}"
+      - run: echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
       - run: docker tag app "${IMAGE_NAME}:${CIRCLE_BUILD_NUM}"
       - run: docker tag app "${IMAGE_NAME}:latest"
       - run: docker push "${IMAGE_NAME}:${CIRCLE_BUILD_NUM}"
