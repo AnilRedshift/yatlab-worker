@@ -28,8 +28,11 @@ defmodule Worker do
   defp handle_errors({:error, "Slack API returned an error `invalid_auth" <> _ = message}, team),
     do: reset(team, message)
 
-  defp handle_errors({:error, "Slack API returned an error `account_inactive" <> _ = message}, team),
-    do: reset(team, message)
+  defp handle_errors(
+         {:error, "Slack API returned an error `account_inactive" <> _ = message},
+         team
+       ),
+       do: reset(team, message)
 
   defp handle_errors(response, team) do
     IO.puts("UNEXPECTED response from start_link for #{team}")
