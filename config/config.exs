@@ -13,7 +13,6 @@ config :worker,
   slack_web_reactions_api: Worker.SlackWebApi.Impl.Reactions,
   team_id: "${TEAM_ID}"
 
-config :logger,
-  truncate: :infinity
+config :logger, truncate: :infinity
 
 import_config "#{Mix.env()}.exs"
