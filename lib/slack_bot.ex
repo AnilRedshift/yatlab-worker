@@ -85,6 +85,7 @@ defmodule Worker.SlackBot do
 
   defp get_text(%{"messages" => []}), do: ""
   defp get_text(%{"messages" => [%{"text" => text} | _]}), do: text
+  defp get_text(%{}), do: ""
 
   defp get_text(%{item: %{ts: ts, channel: channel}}, state) do
     params = %{token: web_token(state)}
