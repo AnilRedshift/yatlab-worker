@@ -5,7 +5,6 @@ defmodule Worker.DatabaseApi do
   @callback reset_version(team_id :: String.t()) :: {:ok, %Postgrex.Result{}}
 end
 
-
 defmodule Worker.DatabaseApi.Postgres do
   require Postgrex
   @behaviour Worker.DatabaseApi
@@ -30,7 +29,7 @@ defmodule Worker.DatabaseApi.Postgres do
   def reset_version(team_id) do
     query = "UPDATE teams SET version = 0 WHERE id = $1"
     params = [team_id]
-    execute(query, params);
+    execute(query, params)
   end
 
   defp execute(query, params), do: Postgrex.query(:app_database, query, params)

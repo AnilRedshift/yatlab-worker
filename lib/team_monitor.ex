@@ -33,7 +33,9 @@ defmodule TeamMonitor do
     Enum.each(teams, fn team -> IO.puts("Team monitor starting #{team}") end)
 
     teams
-    |> Enum.map(fn team -> {team, DynamicSupervisor.start_child(Worker.Supervisor, {Worker, team})} end)
+    |> Enum.map(fn team ->
+      {team, DynamicSupervisor.start_child(Worker.Supervisor, {Worker, team})}
+    end)
     |> Enum.filter(fn {_, result} -> started?(result) end)
     |> Enum.map(fn {team, _} -> team end)
     |> MapSet.new()
@@ -44,10 +46,12 @@ defmodule TeamMonitor do
 
   defp update(state) do
     all_teams = get_teams()
-    running_teams = all_teams
-    |> MapSet.difference(state)
-    |> start
-    |> MapSet.union(state)
+
+    running_teams =
+      all_teams
+      |> MapSet.difference(state)
+      |> start
+      |> MapSet.union(state)
 
     MapSet.difference(all_teams, running_teams)
     |> handle_failed_teams
@@ -62,5 +66,4 @@ defmodule TeamMonitor do
       IO.puts("Failed to start team #{team}")
     end)
   end
-
 end
