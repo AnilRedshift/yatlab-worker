@@ -24,24 +24,43 @@ defmodule TeamMonitor do
     Process.send_after(self(), :update, delay)
   end
 
-  defp start(teams) when teams == @no_teams, do: IO.puts("No new teams")
+  defp start(teams) when teams == @no_teams do
+    IO.puts("No new teams")
+    teams
+  end
 
   defp start(teams) do
+    Enum.each(teams, fn team -> IO.puts("Team monitor starting #{team}") end)
+
+    teams
+    |> Enum.map(fn team -> {team, DynamicSupervisor.start_child(Worker.Supervisor, {Worker, team})} end)
+    |> Enum.filter(fn {_, result} -> started?(result) end)
+    |> Enum.map(fn {team, _} -> team end)
+    |> MapSet.new()
+  end
+
+  defp started?({:ok, _}), do: true
+  defp started?(_), do: false
+
+  defp update(state) do
+    all_teams = get_teams()
+    running_teams = all_teams
+    |> MapSet.difference(state)
+    |> start
+    |> MapSet.union(state)
+
+    MapSet.difference(all_teams, running_teams)
+    |> handle_failed_teams
+
+    poll()
+    {:noreply, running_teams}
+  end
+
+  defp handle_failed_teams(teams) do
     teams
     |> Enum.each(fn team ->
-      IO.puts("Starting worker for #{team}")
-      {:ok, _} = DynamicSupervisor.start_child(Worker.Supervisor, {Worker, team})
+      IO.puts("Failed to start team #{team}")
     end)
   end
 
-  defp update(state) do
-    teams = get_teams()
-
-    teams
-    |> MapSet.difference(state)
-    |> start
-
-    poll()
-    {:noreply, teams}
-  end
 end
