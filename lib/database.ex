@@ -54,6 +54,10 @@ defmodule Worker.Database do
     @database_api.reset_version(team_id)
   end
 
+  def set_user_typed_acronym(acronym_id: acronym_id, user_id: user_id) do
+    @database_api.set_user_typed_acronym(acronym_id: acronym_id, user_id: user_id)
+  end
+
   def call(team_id) do
     with {:ok, acronym_data} <- @database_api.get_acronyms(team_id),
          {:ok, team_data} <- @database_api.get_team(team_id),
