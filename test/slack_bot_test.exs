@@ -25,11 +25,13 @@ defmodule SlackBotTest do
 
   test "adds a checkbox if one acronym is in the text" do
     setup_reactions_add_mock()
+    setup_logging_mock()
     assert {:ok, %{}} = Worker.SlackBot.handle_event(message(), slack(), state())
   end
 
   test "adds a checkbox if the acronym is lowercased" do
     setup_reactions_add_mock()
+    setup_logging_mock()
     m = message(%{text: "The phrase eod is lowercased."})
     assert {:ok, %{}} = Worker.SlackBot.handle_event(m, slack(), state())
   end
@@ -99,10 +101,23 @@ defmodule SlackBotTest do
     |> expect(:post_ephemeral, fn channel, _, @user_id, _ -> {:ok} end)
   end
 
-  def setup_reactions_add_mock() do
+  defp setup_reactions_add_mock() do
     Worker.SlackWebApi.Reactions.MockClient
     |> expect(:add, fn @reaction, %{} ->
       {:ok}
+    end)
+  end
+
+  defp setup_logging_mock() do
+    Worker.DatabaseApi.MockClient
+    |> expect(:set_user_typed_acronym, fn(acronym_id: _, user_id: _) ->
+      {
+        :ok,
+        %Postgrex.Result{
+          columns: nil,
+          rows: nil,
+        }
+      }
     end)
   end
 

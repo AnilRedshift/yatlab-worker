@@ -39,8 +39,9 @@ defmodule Worker.SlackBot do
 
   def handle_event(%{type: "message"} = message, _, state) do
     state = Worker.Database.update(state)
-
-    if match?([_ | _], Worker.MessageParser.parse(message.text, state.acronyms)) do
+    acronyms = Worker.MessageParser.parse(message.text, state.acronyms)
+    if match?([_ | _], acronyms) do
+      Worker.Stats.log_typed_acronyms(acronyms: acronyms, user_id: message.user)
       @slack_web_reactions_api.add(@emoji, %{
         token: bot_token(state),
         channel: message.channel,
