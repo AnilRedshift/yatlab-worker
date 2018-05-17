@@ -8,19 +8,19 @@ defmodule StatsTest do
   @user_id "U123"
   @acronym1 %Acronym{
     added_by: "Anil Kulkarni",
-      description: "he's a ham",
-      id: 6,
-      means: "Jordan",
-      name: "HAM",
-      team_id: "team1"
+    description: "he's a ham",
+    id: 6,
+    means: "Jordan",
+    name: "HAM",
+    team_id: "team1"
   }
   @acronym2 %Acronym{
     added_by: "Ada Bear",
-      description: "The worst acronym",
-      id: 7,
-      means: "Three letter acronym",
-      name: "TLA",
-      team_id: "team1"
+    description: "The worst acronym",
+    id: 7,
+    means: "Three letter acronym",
+    name: "TLA",
+    team_id: "team1"
   }
 
   setup :verify_on_exit!
@@ -31,17 +31,19 @@ defmodule StatsTest do
   end
 
   defp stub_update_acronyms([]), do: nil
+
   defp stub_update_acronyms([%{id: acronym_id} | acronyms]) do
     Worker.DatabaseApi.MockClient
-    |> expect(:set_user_typed_acronym, fn(acronym_id: ^acronym_id, user_id: @user_id) ->
+    |> expect(:set_user_typed_acronym, fn acronym_id: ^acronym_id, user_id: @user_id ->
       {
         :ok,
         %Postgrex.Result{
           columns: nil,
-          rows: nil,
+          rows: nil
         }
       }
     end)
+
     stub_update_acronyms(acronyms)
   end
 end

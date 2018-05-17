@@ -110,12 +110,12 @@ defmodule SlackBotTest do
 
   defp setup_logging_mock() do
     Worker.DatabaseApi.MockClient
-    |> expect(:set_user_typed_acronym, fn(acronym_id: _, user_id: _) ->
+    |> expect(:set_user_typed_acronym, fn acronym_id: _, user_id: _ ->
       {
         :ok,
         %Postgrex.Result{
           columns: nil,
-          rows: nil,
+          rows: nil
         }
       }
     end)
