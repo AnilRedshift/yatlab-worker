@@ -6,7 +6,8 @@ defmodule Worker.Application do
   def start(_type, _args) do
     children = [
       postgres(),
-      {DynamicSupervisor, name: Worker.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Worker.Supervisor, strategy: :one_for_one, max_restarts: 100, max_seconds: 5},
       {TeamMonitor, []}
     ]
 
