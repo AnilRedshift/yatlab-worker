@@ -85,7 +85,11 @@ defmodule Worker.Database do
   end
 
   defp parse_acronyms(result) do
-    {:ok, Enum.map(parse_result(result), &struct(Acronym, &1))}
+    acronyms =
+      Enum.map(parse_result(result), &struct(Acronym, &1))
+      |> AcronymValidator.validate()
+
+    {:ok, acronyms}
   end
 
   defp parse_team(result) do

@@ -98,7 +98,7 @@ defmodule SlackBotTest do
 
   defp setup_chat_post_message_mock(channel \\ @channel) do
     Worker.SlackWebApi.Chat.MockClient
-    |> expect(:post_ephemeral, fn channel, _, @user_id, _ -> {:ok} end)
+    |> expect(:post_ephemeral, fn ^channel, _, @user_id, _ -> {:ok} end)
   end
 
   defp setup_reactions_add_mock() do

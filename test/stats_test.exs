@@ -14,15 +14,6 @@ defmodule StatsTest do
     name: "HAM",
     team_id: "team1"
   }
-  @acronym2 %Acronym{
-    added_by: "Ada Bear",
-    description: "The worst acronym",
-    id: 7,
-    means: "Three letter acronym",
-    name: "TLA",
-    team_id: "team1"
-  }
-
   setup :verify_on_exit!
 
   test "log one acronym" do
