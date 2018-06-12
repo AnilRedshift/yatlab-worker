@@ -1,6 +1,7 @@
 defmodule AcronymValidatorTest do
   use ExUnit.Case
   alias Worker.Database.Acronym
+
   @acronym %Acronym{
     added_by: "Anil Kulkarni",
     description: "he's a ham",
